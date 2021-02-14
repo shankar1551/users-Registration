@@ -1,0 +1,312 @@
+
+import React from 'react'
+import { Form, FormField, TextBox, LinkButton, PasswordBox } from 'rc-easyui';
+
+class App extends React.Component {
+    constructor(props) {
+      super(props);
+     
+        this.fnameRef = React.createRef();
+        console.log(this.fnameRef,'is the refrence of fname');
+
+
+    
+      this.state = {
+        user: {
+          fname: null,
+          lname:null,
+          email: null,
+          password_1:null,
+          password_2:null
+         
+        },
+        allUser:
+            [...this.props.alluser],
+        rules:
+            {
+                fname: ["required"],
+                lname:["required"],
+                email:['required','email'],
+                password_1:['required','length[5,12]'],
+                password_2:['required','length[5,12]'],
+            }
+        
+      }
+
+     
+       
+
+        
+      
+
+    }
+
+ 
+    handleChange(name, value) {
+      let user = Object.assign({}, this.state.user);
+      user[name] = value;
+      this.setState({ user: user })
+        // console.log(name,value);
+    }
+
+
+
+   
+
+    handleSubmit() 
+    {
+
+
+        
+          
+           
+        //...validate the passwords---
+            if(this.state.user.password_2!==this.state.user.password_1)
+            {
+                // console.log('password does not matches');
+                window.alert('password do not match');
+                return;
+            }
+
+          else
+          {
+            
+            this.props.addUser(this.state.user);
+           
+            this.setState({
+                ...this.state,
+                user:{
+                    fname: null,
+                    lname:null,
+                    email: null,
+                    password_1:null,
+                    password_2:null
+                   
+                }
+                });
+          }  
+
+        
+       
+              
+
+    }
+    render() {
+      const { user } = this.state;
+      return (
+        <div className='user-container'>
+          <h2 style={{textAlign:'center'}}>Registration Form</h2>
+          <Form
+            rules={this.state.rules}
+            style={{ maxWidth: 800 }}
+            model={user}
+            labelWidth={220}
+            labelAlign="right"
+            onChange={this.handleChange.bind(this)}
+          >
+            <FormField   name="fname" label=" First Name:">
+              <TextBox value={this.state.user.fname} ref={this.fnameRef}  ></TextBox>
+            </FormField>
+            <FormField name="lname" label="Last Name:">
+              <TextBox value={this.state.user.lname}></TextBox>
+            </FormField>
+            <FormField name='email' label='Email:'>
+                <TextBox value={this.state.user.email}></TextBox>
+            </FormField>
+            <FormField name='password_1' label="Password">
+                <PasswordBox value={this.state.user.password_1}></PasswordBox>
+            </FormField>
+            <FormField name="password_2" label='Confirm Password'>
+                <PasswordBox value={this.state.user.password_2}></PasswordBox>
+            </FormField>
+            <FormField style={{ marginLeft: 120 }}>
+              <LinkButton onClick={this.handleSubmit.bind(this)}>Submit</LinkButton>
+            </FormField>
+          </Form>
+         
+          {/* <p>{JSON.stringify(user)}</p> */}
+        </div>
+      );
+    }
+  }
+   
+  export default App;
+
+  ----------users end----
+
+
+  ------grid start-----
+
+        import React from 'react';
+import { DataGrid, GridColumn } from 'rc-easyui';
+ 
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    console.log(props);
+  }
+  
+
+
+  render() {
+
+        let data=null;
+        if(this.props.allUsers.length===0 )
+        {
+            data= <h1>There Are No Users</h1>;
+        }
+        else{
+              data = this.props.allUsers.map((item,index)=>{
+                return(
+                
+              <div >
+                <div >
+                    <DataGrid data={[item]} style={{height:90,width:'100%'}}>
+                    <GridColumn field="fname" title="First Name:"></GridColumn>
+                    <GridColumn field="fname" title="Last Name:"></GridColumn>
+                    <GridColumn field="email" title="Email:"></GridColumn>
+                  </DataGrid>
+                  <button onClick={ ()=>{this.props.deleteUser(index)}} style={{ width:'100%' }}>Delete</button>
+                
+                </div>
+                    <br/>
+                    <br/>
+            </div> 
+                );
+              
+            });
+        }
+
+        
+
+    return (
+      <div className="grid-container">
+        <h2>Users List</h2>
+        {data}
+      </div>
+    );
+  }
+}
+ 
+export default App;
+
+
+
+// <DataGrid data={this.state.data} style={{height:250}}>
+// <GridColumn field="itemid" title="Item ID"></GridColumn>
+// <GridColumn field="name" title="Name"></GridColumn>
+// <GridColumn field="listprice" title="List Price" align="right"></GridColumn>
+// <GridColumn field="unitcost" title="Unit Cost" align="right"></GridColumn>
+// <GridColumn field="attr" title="Attribute" width="30%"></GridColumn>
+// <GridColumn field="status" title="Status" align="center"></GridColumn>
+// </DataGrid>
+
+
+----grid end----
+
+
+
+-----------app start-------
+
+
+import './App.css';
+import React,{useState,useEffect} from 'react';
+import Users from './Users';
+import Grid from './Grid';
+import { Layout, LayoutPanel } from 'rc-easyui';
+
+
+
+
+
+const App = ()=>
+{
+
+
+  
+
+ if(JSON.parse(localStorage.getItem('userRegistration'))===null )
+ {
+   let temparray=[];
+  localStorage.setItem('userRegistration',JSON.stringify(temparray));
+ }
+  
+  const[alluser,setAlluser] = useState(JSON.parse(localStorage.getItem('userRegistration')));
+
+  
+
+
+
+
+  //delete user on button click function-
+  const deleteUser = (index)=>
+  {
+        
+        //receiving the existing users
+        let rdata = JSON.parse(localStorage.getItem('userRegistration'));
+      //deleting the selected user
+        const deletedUser = rdata.filter((item,ind)=>{
+          if(ind!==index)
+          {
+            console.log(index);
+            return item;
+          }
+        });
+      
+        //storing the users after delition
+        localStorage.setItem('userRegistration',JSON.stringify(deletedUser));
+        setAlluser(deletedUser);
+
+
+        
+  }
+
+
+
+  //adding the new user
+  const addUser = (data)=>
+  {
+      // console.log(data,'to be added');
+      //fetching the existing users
+      let rdata = JSON.parse(localStorage.getItem('userRegistration'));
+      console.log(rdata);
+      //adding new user
+      rdata.push(data);
+      localStorage.setItem('userRegistration',JSON.stringify(rdata));
+      // console.log(rdata,'after adding user');
+     //updating state with new user list
+      setAlluser(rdata);
+
+      // console.log(alluser,'is the all user');
+
+
+  }
+
+
+
+  return (
+  
+  <>
+    
+    <Layout style={{ width: '100%', height: 1024 }}>
+         
+         <LayoutPanel region="west" style={{ width: '50%' }}>
+            <Users  alluser= {alluser} addUser={addUser}/>
+         </LayoutPanel>
+         <LayoutPanel region="east" style={{ width: '50%' }}>
+            <Grid allUsers={alluser} deleteUser={deleteUser}/>
+         </LayoutPanel>
+        
+       </Layout>  
+        
+         
+       
+  
+  </>);
+
+}
+
+
+export default App;
+
+---app end----
